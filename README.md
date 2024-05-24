@@ -1,4 +1,6 @@
-Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser.
+# ChromeDB
+
+Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser. <!-- Yeah, it's called <em>Chrome</em>DB, but `chromiumdb` is a bit of a mouthful for a Go package name. -->
 
 ## Description
 
