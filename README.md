@@ -113,14 +113,14 @@ This has only been tested with Arc browser on macOS, but should work with any Ch
 ### Install
 
 ```bash
-𝄢 go install -v github.com/noperator/chromiumfs/cmd/cfs@latest
+𝄢 go install -v github.com/noperator/chromedb/cmd/chromedb@latest
 ```
 
 ### Usage
 
 ```bash
-𝄢 cfs -h
-Usage of cfs:
+𝄢 chromedb -h
+Usage of chromedb:
   -c	cookies
   -ls
     	local storage
@@ -133,7 +133,7 @@ To decrypt cookies for Chromium-based Arc browser, we need to first get its pass
 
 ```bash
 𝄢  export BROWSER_PASSWORD=$(security find-generic-password -wga Arc)
-𝄢 cfs -c -p ~/Library/Application\ Support/Arc/User\ Data/Profile\ 1/ |
+𝄢 chromedb -c -p ~/Library/Application\ Support/Arc/User\ Data/Profile\ 1/ |
     shuf -n 2 |
     jq '.encrypted_value = "<ENCRYPTED>"'
 
@@ -154,7 +154,7 @@ To decrypt cookies for Chromium-based Arc browser, we need to first get its pass
 Local storage is unencrypted and doesn't require a password.
 
 ```bash
-𝄢 cfs -ls -p ~/Library/Application\ Support/Arc/User\ Data/Profile\ 1/ |
+𝄢 chromedb -ls -p ~/Library/Application\ Support/Arc/User\ Data/Profile\ 1/ |
     shuf -n 2 |
     jq
 
