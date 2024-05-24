@@ -1,6 +1,6 @@
 # ChromeDB
 
-Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser. <!-- Yeah, it's called <em>Chrome</em>DB, but `chromiumdb` is a bit of a mouthful for a Go package name. -->
+Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser.<!-- Yeah, it's called <em>Chrome</em>DB, but `chromiumdb` is a bit of a mouthful for a Go package name. --> I primarily use this to extract tokens from authenticated browser sessions for use in automation, scraping, etc.
 
 ## Description
 
@@ -198,6 +198,7 @@ cat topics.jsonl | jq -sc 'group_by(.repo) | map({
 
 ### To-do
 
-- [ ] Decrypt cookies on Linux, Windows
-- [ ] Specify a domain to filter on
-- [ ] Clean up error handling, logging
+- [ ] decrypt cookies on Linux, Windows
+- [ ] specify a domain to filter on
+- [ ] clean up error handling, logging
+- [ ] support session storage
