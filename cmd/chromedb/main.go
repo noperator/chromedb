@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/noperator/chromiumfs"
+	"github.com/noperator/chromedb"
 )
 
 func main() {
@@ -27,13 +27,13 @@ func main() {
 	if *cookies {
 
 		cookiesPath := filepath.Join(*browserPath, "Cookies")
-		cookies, err := getCookies(cookiesPath)
+		cookies, err := chromedb.GetCookies(cookiesPath)
 		if err != nil {
 			fmt.Println("Error opening Cookies database:", err)
 			os.Exit(1)
 		}
 
-		key, err := getKey()
+		key, err := chromedb.GetKey()
 		if err != nil {
 			fmt.Println("Error getting key:", err)
 			os.Exit(1)
@@ -41,7 +41,7 @@ func main() {
 
 		for _, c := range cookies {
 			if len(c.EncryptedValue) > 0 {
-				value, err := decryptValue(c.EncryptedValue, key)
+				value, err := chromedb.DecryptValue(c.EncryptedValue, key)
 				if err != nil {
 					fmt.Println("Failed to decrypt cookie %s: %v", c.Name, err)
 				}
@@ -62,15 +62,15 @@ func main() {
 
 		localStoragePath := filepath.Join(*browserPath, "Local Storage/leveldb")
 
-		lsd, err := LoadLocalStorage(localStoragePath)
+		lsd, err := chromedb.LoadLocalStorage(localStoragePath)
 		if err != nil {
 			fmt.Println("Error opening LevelDB:", err)
 			os.Exit(1)
 		}
 		defer lsd.Close()
 
-		for _, r := range lsd.records {
-			j, err := RecordToJson(r)
+		for _, r := range lsd.Records {
+			j, err := chromedb.RecordToJson(r)
 			if err != nil {
 				fmt.Println("Error converting record to JSON:", err)
 				os.Exit(1)

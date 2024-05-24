@@ -1,4 +1,4 @@
-package chromiumfs
+package chromedb
 
 import (
 	"bytes"
@@ -63,7 +63,7 @@ type LocalStorageRecord struct {
 
 type LocalStoreDb struct {
 	ldb      *leveldb.DB
-	records  []LocalStorageRecord `json:"records"`
+	Records  []LocalStorageRecord `json:"records"`
 	metadata []StorageMetadata    `json:"metadata"`
 }
 
@@ -269,7 +269,7 @@ func LoadLocalStorage(dir string) (*LocalStoreDb, error) {
 			record.Decoded = val
 			record.Charset = valEnc
 
-			lsd.records = append(lsd.records, record)
+			lsd.Records = append(lsd.Records, record)
 		}
 	}
 

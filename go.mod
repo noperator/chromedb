@@ -1,4 +1,4 @@
-module github.com/noperator/chromiumfs
+module github.com/noperator/chromedb
 
 go 1.21.5
 

@@ -1,4 +1,4 @@
-package chromiumfs
+package chromedb
 
 import (
 	"crypto/aes"
@@ -20,7 +20,7 @@ type Cookie struct {
 	Value          string `json:"value"`
 }
 
-func getCookies(cookiesPath string) ([]Cookie, error) {
+func GetCookies(cookiesPath string) ([]Cookie, error) {
 
 	db, err := sql.Open("sqlite3", cookiesPath)
 	if err != nil {
@@ -50,7 +50,7 @@ func getCookies(cookiesPath string) ([]Cookie, error) {
 	return cookies, nil
 }
 
-func getKey() ([]byte, error) {
+func GetKey() ([]byte, error) {
 	browserPassword := os.Getenv("BROWSER_PASSWORD")
 	if browserPassword == "" {
 		return []byte{}, fmt.Errorf("password not set")
@@ -59,7 +59,7 @@ func getKey() ([]byte, error) {
 	return pbkdf2.Key([]byte(password), []byte("saltysalt"), 1003, 16, sha1.New), nil
 }
 
-func decryptValue(encryptedValue, key []byte) (string, error) {
+func DecryptValue(encryptedValue, key []byte) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
