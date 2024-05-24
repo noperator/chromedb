@@ -1,6 +1,11 @@
-# ChromeDB
+<p align="center">
+    <img alt="chromedb logo" src="https://i.imgur.com/zWFv2oc.png" width="400px">
+    <center>
+    <div>Because <code>chromiumdb</code> is a bit of a mouthful for a Go package name.</div>
+    </center>
+</p>
 
-Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser.<!-- Yeah, it's called <em>Chrome</em>DB, but `chromiumdb` is a bit of a mouthful for a Go package name. --> I primarily use this to extract tokens from authenticated browser sessions for use in automation, scraping, etc.
+Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser. I primarily use this to extract tokens from authenticated browser sessions for use in automation, scraping, etc.
 
 ## Description
 
