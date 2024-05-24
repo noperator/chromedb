@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/noperator/chromiumfs"
 )
 
 func main() {
 
-	browserPath := flag.String("p", "", "path to browser data")
+	browserPath := flag.String("p", "", "path to browser profile directory")
 	cookies := flag.Bool("c", false, "cookies")
 	localStorage := flag.Bool("ls", false, "local storage")
 
