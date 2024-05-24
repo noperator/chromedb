@@ -1,8 +1,5 @@
 <p align="center">
-    <img alt="chromedb logo" src="https://i.imgur.com/zWFv2oc.png" width="400px">
-    <center>
-    <div>Because <code>chromiumdb</code> is a bit of a mouthful for a Go package name.</div>
-    </center>
+<img alt="chromedb logo" src="https://i.imgur.com/zWFv2oc.png" width="500px"><br>Because <code>chromiumdb</code> is a bit of a mouthful for a Go package name.
 </p>
 
 Read Chromium data (namely, cookies and local storage) straight from disk—_without_ spinning up the browser. I primarily use this to extract tokens from authenticated browser sessions for use in automation, scraping, etc.
