@@ -53,7 +53,7 @@ func GetCookies(cookiesPath string) ([]Cookie, error) {
 func GetKey() ([]byte, error) {
 	browserPassword := os.Getenv("BROWSER_PASSWORD")
 	if browserPassword == "" {
-		return []byte{}, fmt.Errorf("password not set")
+		return []byte{}, fmt.Errorf("BROWSER_PASSWORD environment variable not set")
 	}
 	password := strings.TrimSpace(string(browserPassword))
 	return pbkdf2.Key([]byte(password), []byte("saltysalt"), 1003, 16, sha1.New), nil

@@ -12,14 +12,33 @@ import (
 
 func main() {
 
-	browserPath := flag.String("p", "", "path to browser profile directory")
+	browserPath := flag.String("p", "", "path to browser profile directory (required)")
 	cookies := flag.Bool("c", false, "cookies")
 	localStorage := flag.Bool("ls", false, "local storage")
+	sessionStorage := flag.Bool("ss", false, "session storage")
 
 	flag.Parse()
 
-	if *cookies && *localStorage {
-		fmt.Println("Error: The -c and -ls flags are mutually exclusive")
+	if *browserPath == "" {
+		fmt.Println("Error: -p flag (path to browser profile directory) is required")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	// Check for mutually exclusive flags.
+	flagCount := 0
+	if *cookies {
+		flagCount++
+	}
+	if *localStorage {
+		flagCount++
+	}
+	if *sessionStorage {
+		flagCount++
+	}
+
+	if flagCount != 1 {
+		fmt.Println("Error: Please specify exactly one of -c, -ls, or -ss")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -43,7 +62,7 @@ func main() {
 			if len(c.EncryptedValue) > 0 {
 				value, err := chromedb.DecryptValue(c.EncryptedValue, key)
 				if err != nil {
-					fmt.Println("Failed to decrypt cookie %s: %v", c.Name, err)
+					fmt.Printf("Failed to decrypt cookie %s: %v\n", c.Name, err)
 				}
 				c.Value = value
 			}
@@ -59,7 +78,6 @@ func main() {
 	}
 
 	if *localStorage {
-
 		localStoragePath := filepath.Join(*browserPath, "Local Storage/leveldb")
 
 		lsd, err := chromedb.LoadLocalStorage(localStoragePath)
@@ -70,7 +88,7 @@ func main() {
 		defer lsd.Close()
 
 		for _, r := range lsd.Records {
-			j, err := chromedb.RecordToJson(r)
+			j, err := chromedb.LocalStorageRecordToJson(r)
 			if err != nil {
 				fmt.Println("Error converting record to JSON:", err)
 				os.Exit(1)
@@ -80,4 +98,24 @@ func main() {
 		}
 	}
 
+	if *sessionStorage {
+		sessionStoragePath := filepath.Join(*browserPath, "Session Storage")
+
+		ssd, err := chromedb.LoadSessionStorage(sessionStoragePath)
+		if err != nil {
+			fmt.Println("Error opening LevelDB:", err)
+			os.Exit(1)
+		}
+		defer ssd.Close()
+
+		for _, r := range ssd.Records {
+			j, err := chromedb.SessionStorageRecordToJson(r)
+			if err != nil {
+				fmt.Println("Error converting record to JSON:", err)
+				os.Exit(1)
+			}
+
+			fmt.Println(j)
+		}
+	}
 }

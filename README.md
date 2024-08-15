@@ -203,4 +203,4 @@ cat topics.jsonl | jq -sc 'group_by(.repo) | map({
 - [ ] decrypt cookies on Linux, Windows
 - [ ] specify a domain to filter on
 - [ ] clean up error handling, logging
-- [ ] support session storage
+- [x] support session storage
