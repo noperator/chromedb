@@ -16,6 +16,7 @@ func main() {
 	cookies := flag.Bool("c", false, "cookies")
 	localStorage := flag.Bool("ls", false, "local storage")
 	sessionStorage := flag.Bool("ss", false, "session storage")
+	extensionStorage := flag.Bool("es", false, "extension storage")
 
 	flag.Parse()
 
@@ -36,9 +37,12 @@ func main() {
 	if *sessionStorage {
 		flagCount++
 	}
+	if *extensionStorage {
+		flagCount++
+	}
 
 	if flagCount != 1 {
-		fmt.Println("Error: Please specify exactly one of -c, -ls, or -ss")
+		fmt.Println("Error: Please specify exactly one of -c, -ls, -ss, or -es")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -116,6 +120,43 @@ func main() {
 			}
 
 			fmt.Println(j)
+		}
+	}
+
+	if *extensionStorage {
+		extensionPath := filepath.Join(*browserPath, "Sync Extension Settings")
+
+		// Walk through all extension directories
+		err := filepath.Walk(extensionPath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			// Only process directories that look like extension IDs
+			if info.IsDir() && filepath.Base(path) != "Sync Extension Settings" {
+				esd, err := chromedb.LoadExtensionStorage(path)
+				if err != nil {
+					fmt.Printf("Error opening extension storage for %s: %v\n", filepath.Base(path), err)
+					return nil // Continue with next extension
+				}
+				defer esd.Close()
+
+				for _, r := range esd.Records {
+					j, err := chromedb.ExtensionStorageRecordToJson(r)
+					if err != nil {
+						fmt.Printf("Error converting record to JSON for extension %s: %v\n", r.ExtensionID, err)
+						continue
+					}
+
+					fmt.Println(j)
+				}
+			}
+			return nil
+		})
+
+		if err != nil {
+			fmt.Println("Error walking extension directories:", err)
+			os.Exit(1)
 		}
 	}
 }
