@@ -1,9 +1,11 @@
 package chromedb
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/sha1"
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
 	"os"
@@ -27,6 +29,17 @@ func GetCookies(cookiesPath string) ([]Cookie, error) {
 		return nil, err
 	}
 	defer db.Close()
+
+	// Check the database version - we'll use this later for decryption
+	var dbVersion int
+	row := db.QueryRow("SELECT value FROM meta WHERE key = 'version'")
+	if err := row.Scan(&dbVersion); err != nil {
+		// If we can't get the version, assume it's an older version
+		dbVersion = 0
+	}
+	
+	// Store the database version in a package variable for DecryptValue to use
+	currentDBVersion = dbVersion
 
 	// query := "SELECT name, value, host_key, encrypted_value FROM cookies WHERE host_key like ?"
 	// rows, err := db.Query(query, fmt.Sprintf("%%%s%%", domain))
@@ -59,7 +72,10 @@ func GetKey() ([]byte, error) {
 	return pbkdf2.Key([]byte(password), []byte("saltysalt"), 1003, 16, sha1.New), nil
 }
 
-func DecryptValue(encryptedValue, key []byte) (string, error) {
+// Package variable to store the current database version
+var currentDBVersion int
+
+func DecryptValue(encryptedValue, key []byte, domain string) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
@@ -98,6 +114,28 @@ func DecryptValue(encryptedValue, key []byte) (string, error) {
 		return "", fmt.Errorf("invalid last block padding length: %d", paddingLen)
 	}
 
+	// In Chrome database versions ≥ 24, the first 32 bytes contain a SHA256 digest of the host_key (domain)
+	// This was added in Chrome v130 (https://github.com/chromium/chromium/commit/5ea6d65c622a3d5ff75db9dc0257ea3869f31289)
+	if currentDBVersion >= 24 {
+		// Need to verify and skip the first 32 bytes (SHA256 digest of domain)
+		if len(decrypted) <= 32 {
+			return "", fmt.Errorf("decrypted data too short for db version %d, expected more than 32 bytes but got %d", currentDBVersion, len(decrypted))
+		}
+		
+		// If domain is provided, verify the SHA256 hash matches
+		if domain != "" {
+			// Calculate SHA256 hash of the domain
+			domainHash := sha256.Sum256([]byte(domain))
+			
+			// Check if the hash in the decrypted value matches the calculated hash
+			if !bytes.Equal(domainHash[:], decrypted[:32]) { // SHA256 is 32 bytes
+				return "", fmt.Errorf("domain hash verification failed")
+			}
+		}
+		
+		return string(decrypted[32:len(decrypted)-paddingLen]), nil
+	}
+	
+	// For older versions, return the full decrypted value (minus padding)
 	return string(decrypted[:len(decrypted)-paddingLen]), nil
-
 }
