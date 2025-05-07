@@ -286,10 +286,11 @@ func LocalStorageRecordToJson(r LocalStorageRecord) (string, error) {
 	out := []byte{}
 
 	if validJson {
-
-		// Unmarshal the JSON into an interface{}
+		// Use a custom decoder to handle large numbers as strings
+		d := json.NewDecoder(bytes.NewReader(b))
+		d.UseNumber() // This makes the decoder use json.Number for numbers
 		var v interface{}
-		err := json.Unmarshal(b, &v)
+		err := d.Decode(&v)
 		if err != nil {
 			return "", fmt.Errorf("failed to unmarshal supposedly valid JSON: %w", err)
 		}
@@ -297,25 +298,37 @@ func LocalStorageRecordToJson(r LocalStorageRecord) (string, error) {
 		mime = "application/json"
 
 		// Determine the type of the JSON value
-		switch v.(type) {
-		case float64:
+		switch val := v.(type) {
+		case json.Number:
 			jsonType = "number"
+			// Check if the number might be too large for float64
+			_, err := val.Float64()
+			if err != nil {
+				// If it can't be converted to float64, treat it as a string in the output
+				strVal := fmt.Sprintf("\"%s\"", val.String())
+				out = []byte(strVal)
+			} else {
+				out = b
+			}
 		case string:
 			jsonType = "string"
+			out = b
 		case bool:
 			jsonType = "boolean"
+			out = b
 		case []interface{}:
 			jsonType = "array"
+			out = b
 		case map[string]interface{}:
 			jsonType = "object"
+			out = b
 		case nil:
 			jsonType = "null"
+			out = b
 		default:
 			jsonType = ""
+			out = b
 		}
-
-		out = b
-
 	} else {
 		quoted := strconv.Quote(r.Decoded)
 		if json.Valid([]byte(quoted)) {
