@@ -60,7 +60,7 @@ func main() {
 
 		for _, c := range cookies {
 			if len(c.EncryptedValue) > 0 {
-				value, err := chromedb.DecryptValue(c.EncryptedValue, key)
+				value, err := chromedb.DecryptValue(c.EncryptedValue, key, c.Domain)
 				if err != nil {
 					fmt.Printf("Failed to decrypt cookie %s: %v\n", c.Name, err)
 				}
